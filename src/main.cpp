@@ -7,7 +7,8 @@
 #include <ftxui/screen/string.hpp>
 #include <ftxui/screen/terminal.hpp>
 #include <fstream>
-#include <Cocodrilo.hpp> // Cambiado desde #include <Dibujo.hpp>
+#include <Dibujo.hpp> // 
+
 
 using namespace std;
 using namespace ftxui;
