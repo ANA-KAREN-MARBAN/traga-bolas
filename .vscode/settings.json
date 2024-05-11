@@ -1,0 +1,9 @@
+{
+    "balls.settings": {
+        "files.associations": {
+            "red_ball": "jpg",
+            "blue_ball": "jpg",
+            "green_ball": "jpg"
+        }
+    }
+}

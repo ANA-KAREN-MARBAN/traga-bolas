@@ -1,0 +1,13 @@
+# Archivos de código compilado
+*.o
+*.obj
+
+# Bibliotecas compiladas
+*.so
+*.dylib
+*.dll
+
+# Ejecutables
+*.exe
+*.out
+*.app

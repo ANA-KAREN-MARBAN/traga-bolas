@@ -1,0 +1,31 @@
+docs/traga_bolas.puml
+
+@startuml traga_bolas
+
+class Cocodrilo
+class Bolas
+
+class Juego
+class Puntuacion
+class Nivel
+class Jugador
+class Colisionable
+
+Juego "1" *-- "*" Nivel
+Nivel "1" *-- "*" Bolas
+Nivel "1" *-- "1" Cocodrilo
+
+Jugador "1" o-- "1" Cocodrilo
+
+Juego "1" *-- "1" Jugador
+Jugador "1" *-- "1" Puntuacion
+
+Juego "1" *-- "1" Jugador
+
+Bolas o-- Colisionable
+
+Cocodrilo --|> Colisionable
+
+Bolas *-- Puntuacion
+
+@enduml
