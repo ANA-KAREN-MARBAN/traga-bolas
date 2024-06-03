@@ -1,3 +1,8 @@
+INCLUDE := -I/opt/homebrew/include
+LIB := -L/opt/homebrew/lib
+SFML := -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio -lbox2d $(INCLUDE) $(LIB)
+
+
 CXX = g++
 CXXFLAGS = -std=c++11 -Wall -Wextra
 LDFLAGS = -lncurses
