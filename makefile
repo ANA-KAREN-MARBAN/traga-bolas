@@ -2,32 +2,34 @@ INCLUDE := -I/opt/homebrew/include
 LIB := -L/opt/homebrew/lib
 SFML := -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio -lbox2d $(INCLUDE) $(LIB)
 
+# Directorios de origen y destino
+SRC_DIR := src
+BIN_DIR := bin
 
-CXX = g++
-CXXFLAGS = -std=c++11 -Wall -Wextra
-LDFLAGS = -lncurses
+INCLUDE := -I/opt/homebrew/include
+LIB := -L/opt/homebrew/lib
+SFML := -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio -lbox2d $(INCLUDE) $(LIB)
 
-SRCDIR = src
-INCDIR = include
-BUILDDIR = build
-BINDIR = bin
+# Obtener todos los archivos .cpp en el directorio de origen
+CPP_FILES := $(wildcard $(SRC_DIR)/*.cpp)
 
-SOURCES = $(wildcard $(SRCDIR)/*.cpp)
-OBJECTS = $(patsubst $(SRCDIR)/%.cpp, $(BUILDDIR)/%.o, $(SOURCES))
-EXECUTABLE = $(BINDIR)/main
+# Generar los nombres de los archivos .exe en el directorio de destino
+EXE_FILES := $(patsubst $(SRC_DIR)/%.cpp,$(BIN_DIR)/%.exe,$(CPP_FILES))
 
-all: $(EXECUTABLE)
+# Regla para compilar cada archivo .cpp y generar el archivo .exe correspondiente
+$(BIN_DIR)/%.exe: $(SRC_DIR)/%.cpp
+	g++ $< -o $@ $(SFML) -Iinclude
 
-$(EXECUTABLE): $(OBJECTS)
-	mkdir -p $(BINDIR)
-	$(CXX) $(CXXFLAGS) $^ -o $@ $(LDFLAGS)
+# Regla por defecto para compilar todos los archivos .cpp
+all: $(EXE_FILES)
 
-$(BUILDDIR)/%.o: $(SRCDIR)/%.cpp
-	mkdir -p $(BUILDDIR)
-	$(CXX) $(CXXFLAGS) -I$(INCDIR) -c $< -o $@
+# Regla para ejecutar cada archivo .exe
+run%: $(BIN_DIR)/%.exe
+	./$<
 
+# Regla para limpiar los archivos generados
 clean:
-	rm -rf $(BUILDDIR)/*.o $(BINDIR)/main
+	rm -f $(EXE_FILES)
 
-run: $(EXECUTABLE)
-	./$(EXECUTABLE)
+.PHONY: all clean
+.PHONY: run-%
