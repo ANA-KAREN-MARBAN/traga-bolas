@@ -1,93 +1,113 @@
-#include <iostream>
-#include <ncurses.h>
+#include <SFML/Graphics.hpp>
 #include <cstdlib>
 #include <ctime>
-#include <thread>
-#include <chrono>
+#include <vector>
+#include <iostream>
 #include "Cocodrilo.hpp"
-
-// Función para inicializar la ventana de ncurses
-void init_ncurses() {
-    initscr(); // Inicializa la pantalla
-    cbreak(); // Deshabilita el búfer de línea
-    noecho(); // No mostrar caracteres escritos
-    curs_set(0); // Oculta el cursor
-    timeout(0); // Configura el tiempo de espera de getch() en modo no bloqueante
-}
-
-// Función para generar una posición aleatoria en la pantalla
-void generar_posicion(int &x, int &y) {
-    x = rand() % COLS;
-    y = rand() % LINES;
-}
+#include "Bola.hpp"
 
 int main() {
-    init_ncurses(); // Inicializa la ventana de ncurses
+    srand(static_cast<unsigned>(time(0)));
 
-    srand(time(NULL)); // Inicializa la semilla aleatoria
+    sf::RenderWindow window(sf::VideoMode(800, 600), "Traga Bolas");
+    window.setFramerateLimit(60);
 
-    // Crear nuevos objetos Cocodrilo
-    Cocodrilo cocodrilo1(LINES / 2, COLS / 4);
-    Cocodrilo cocodrilo2(LINES / 2, 3 * COLS / 4);
+    sf::Texture backgroundTexture;
+    if (!backgroundTexture.loadFromFile("assets/images/background.png")) {
+        std::cerr << "Error cargando la textura de fondo" << std::endl;
+        return -1;
+    }
+    sf::Sprite background(backgroundTexture);
+
+    Cocodrilo cocodrilo1(sf::Vector2f(200, 300), "assets/images/cocodrilo1.png");
+    Cocodrilo cocodrilo2(sf::Vector2f(600, 300), "assets/images/cocodrilo2.png");
+
+    std::vector<Bola> bolas;
+    sf::Clock bolaClock;
 
     int puntuacionCocodrilo1 = 0;
     int puntuacionCocodrilo2 = 0;
 
-    bool mostrarCocodrilo1 = true;
-    bool mostrarCocodrilo2 = true;
-    bool mostrarBolas = true;
+    sf::Font font;
+    if (!font.loadFromFile("assets/fonts/arial.ttf")) {
+        std::cerr << "Error cargando la fuente" << std::endl;
+        return -1;
+    }
 
-    while (true) {
-        clear(); // Limpia la pantalla
-
-        // Dibujar bolas blancas y negras en posiciones aleatorias
-        if (mostrarBolas) {
-            for (int i = 0; i < 50; ++i) {
-                int x, y;
-                generar_posicion(x, y);
-                attron(COLOR_PAIR(1)); // Establece el color a blanco
-                mvprintw(y, x, "o");
-                attroff(COLOR_PAIR(1));
-
-                generar_posicion(x, y);
-                attron(COLOR_PAIR(2)); // Establece el color a negro
-                mvprintw(y, x, "o");
-                attroff(COLOR_PAIR(2));
+    while (window.isOpen()) {
+        sf::Event event;
+        while (window.pollEvent(event)) {
+            if (event.type == sf::Event::Closed) {
+                window.close();
             }
         }
 
-        // Alternar entre mostrar y ocultar los cocodrilos
-        if (mostrarCocodrilo1) {
-            cocodrilo1.dibujar(stdscr);
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
+            cocodrilo1.move(0, -5);
         }
-        if (mostrarCocodrilo2) {
-            cocodrilo2.dibujar(stdscr);
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
+            cocodrilo1.move(0, 5);
         }
-
-        // Contar las bolas comidas por cada cocodrilo
-        if (cocodrilo1.isBocaAbierta()) {
-            ++puntuacionCocodrilo1;
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
+            cocodrilo1.move(-5, 0);
         }
-        if (cocodrilo2.isBocaAbierta()) {
-            ++puntuacionCocodrilo2;
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
+            cocodrilo1.move(5, 0);
         }
 
-        // Imprimir la puntuación de cada cocodrilo
-        mvprintw(1, 1, "Cocodrilo 1: %d bolas comidas", puntuacionCocodrilo1);
-        mvprintw(2, 1, "Cocodrilo 2: %d bolas comidas", puntuacionCocodrilo2);
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+            cocodrilo2.move(0, -5);
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
+            cocodrilo2.move(0, 5);
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
+            cocodrilo2.move(-5, 0);
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
+            cocodrilo2.move(5, 0);
+        }
 
-        // Refrescar la pantalla para mostrar los cambios
-        refresh();
+        if (bolaClock.getElapsedTime().asSeconds() >= 1) {
+            bool isPositive = rand() % 2 == 0;
+            bolas.push_back(Bola(sf::Vector2f(rand() % 800, rand() % 600), isPositive ? "assets/images/bola.png" : "assets/images/bola_negativa.png", isPositive));
+            bolaClock.restart();
+        }
 
-        // Esperar un tiempo antes de la próxima actualización
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        for (auto it = bolas.begin(); it != bolas.end(); ) {
+            if (cocodrilo1.getBounds().intersects(it->getBounds())) {
+                puntuacionCocodrilo1 += it->isPositive() ? 1 : -1;
+                it = bolas.erase(it);
+            } else if (cocodrilo2.getBounds().intersects(it->getBounds())) {
+                puntuacionCocodrilo2 += it->isPositive() ? 1 : -1;
+                it = bolas.erase(it);
+            } else {
+                ++it;
+            }
+        }
 
-        // Alternar entre mostrar y ocultar los cocodrilos en cada iteración
-        mostrarCocodrilo1 = !mostrarCocodrilo1;
-        mostrarCocodrilo2 = !mostrarCocodrilo2;
-        mostrarBolas = !mostrarBolas;
+        window.clear();
+        window.draw(background);
+        cocodrilo1.update();
+        cocodrilo2.update();
+        cocodrilo1.draw(window);
+        cocodrilo2.draw(window);
+        for (auto &bola : bolas) {
+            bola.draw(window);
+        }
+
+        sf::Text text1("Cocodrilo 1: " + std::to_string(puntuacionCocodrilo1), font, 20);
+        text1.setPosition(10, 10);
+        text1.setFillColor(sf::Color::White);
+        window.draw(text1);
+
+        sf::Text text2("Cocodrilo 2: " + std::to_string(puntuacionCocodrilo2), font, 20);
+        text2.setPosition(10, 40);
+        text2.setFillColor(sf::Color::White);
+        window.draw(text2);
+
+        window.display();
     }
 
-    endwin(); // Restaura la configuración de la terminal al salir
     return 0;
 }

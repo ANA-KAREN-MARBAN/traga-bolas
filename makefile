@@ -1,35 +1,22 @@
 INCLUDE := -I/opt/homebrew/include
 LIB := -L/opt/homebrew/lib
-SFML := -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio -lbox2d $(INCLUDE) $(LIB)
+SFML := -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio
 
-# Directorios de origen y destino
 SRC_DIR := src
 BIN_DIR := bin
 
-INCLUDE := -I/opt/homebrew/include
-LIB := -L/opt/homebrew/lib
-SFML := -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio -lbox2d $(INCLUDE) $(LIB)
-
-# Obtener todos los archivos .cpp en el directorio de origen
 CPP_FILES := $(wildcard $(SRC_DIR)/*.cpp)
+EXE_FILE := $(BIN_DIR)/traga_bolas
 
-# Generar los nombres de los archivos .exe en el directorio de destino
-EXE_FILES := $(patsubst $(SRC_DIR)/%.cpp,$(BIN_DIR)/%.exe,$(CPP_FILES))
+$(EXE_FILE): $(CPP_FILES)
+	g++ $^ -o $@ $(SFML) $(INCLUDE) $(LIB)
 
-# Regla para compilar cada archivo .cpp y generar el archivo .exe correspondiente
-$(BIN_DIR)/%.exe: $(SRC_DIR)/%.cpp
-	g++ $< -o $@ $(SFML) -Iinclude
+all: $(EXE_FILE)
 
-# Regla por defecto para compilar todos los archivos .cpp
-all: $(EXE_FILES)
+run: $(EXE_FILE)
+	./$(EXE_FILE)
 
-# Regla para ejecutar cada archivo .exe
-run%: $(BIN_DIR)/%.exe
-	./$<
-
-# Regla para limpiar los archivos generados
 clean:
-	rm -f $(EXE_FILES)
+	rm -f $(EXE_FILE)
 
-.PHONY: all clean
-.PHONY: run-%
+.PHONY: all clean run
