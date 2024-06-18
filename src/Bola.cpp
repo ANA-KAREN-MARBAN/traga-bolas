@@ -1,22 +1,33 @@
 #include "Bola.hpp"
-#include <iostream>
 
-Bola::Bola(sf::Vector2f position, const std::string &textureFile, bool isPositive) : positive(isPositive) {
-    if (!texture.loadFromFile(textureFile)) {
-        std::cerr << "Error cargando la textura de bola" << std::endl;
-    }
-    sprite.setTexture(texture);
-    sprite.setPosition(position);
+Bola::Bola(float radius, const sf::Vector2f& position, const sf::Color& color, const sf::Vector2f& velocity) 
+    : velocity(velocity) {
+    shape.setRadius(radius);
+    shape.setPosition(position);
+    shape.setFillColor(color);
+    shape.setOrigin(radius, radius);
 }
 
-void Bola::draw(sf::RenderWindow &window) {
-    window.draw(sprite);
+void Bola::update(const sf::FloatRect& bounds) {
+    sf::Vector2f position = shape.getPosition();
+    position += velocity * 0.016f;
+
+    if (position.x - shape.getRadius() < bounds.left || 
+        position.x + shape.getRadius() > bounds.left + bounds.width) {
+        velocity.x = -velocity.x;
+    }
+    if (position.y - shape.getRadius() < bounds.top || 
+        position.y + shape.getRadius() > bounds.top + bounds.height) {
+        velocity.y = -velocity.y;
+    }
+
+    shape.setPosition(position);
+}
+
+void Bola::draw(sf::RenderWindow& window) const {
+    window.draw(shape);
 }
 
 sf::FloatRect Bola::getBounds() const {
-    return sprite.getGlobalBounds();
-}
-
-bool Bola::isPositive() const {
-    return positive;
+    return shape.getGlobalBounds();
 }
