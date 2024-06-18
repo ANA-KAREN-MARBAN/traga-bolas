@@ -8,6 +8,8 @@
 
 int main() {
     sf::RenderWindow window(sf::VideoMode(800, 600), "Traga Bolas");
+
+    // Cargar la textura del fondo
     sf::Texture backgroundTexture;
     if (!backgroundTexture.loadFromFile("assets/images/background.png")) {
         return -1;
@@ -25,21 +27,20 @@ int main() {
         return -1;
     }
 
-    sf::Vector2f leftPosition(backgroundBounds.left + 20, window.getSize().y / 2);
-    sf::Vector2f rightPosition(backgroundBounds.left + backgroundBounds.width - 20, window.getSize().y / 2);
+    sf::Vector2f leftPosition(backgroundBounds.left + 100, window.getSize().y / 2); // Ajuste de posición inicial para cocodrilo morado
+    sf::Vector2f rightPosition(backgroundBounds.left + backgroundBounds.width - 50, window.getSize().y / 2); // Ajuste de posición inicial para cocodrilo rojo
 
-    Cocodrilo cocodriloLeft(cocodriloTexture1, leftPosition, 1.0f); // Avanza a la derecha
-    Cocodrilo cocodriloRight(cocodriloTexture2, rightPosition, -1.0f); // Avanza a la izquierda
+    Cocodrilo cocodriloLeft(cocodriloTexture1, leftPosition, 100.0f); // Avanza a la derecha
+    Cocodrilo cocodriloRight(cocodriloTexture2, rightPosition, -100.0f); // Avanza a la izquierda
 
     std::vector<Bola> bolas;
-    const sf::Vector2f bolaVelocity(0.0f, 0.5f); // Velocidad más lenta de las bolas
+    const sf::Vector2f bolaVelocity(0.0f, 0.15f); // Velocidad más lenta de las bolas
 
     sf::Font font;
     if (!font.loadFromFile("assets/fonts/arial.ttf")) {
         return -1;
     }
-
-    sf::Text scoreText;
+sf::Text scoreText;
     scoreText.setFont(font);
     scoreText.setCharacterSize(24);
     scoreText.setFillColor(sf::Color::White);
@@ -69,7 +70,7 @@ int main() {
         float deltaTime = clock.restart().asSeconds();
         spawnTimer += deltaTime;
 
-        if (spawnTimer >= 0.2f) {
+        if (spawnTimer >= 0.09f) { // Aumentar el tiempo de spawn para ralentizar la generación de bolas
             float xPos = static_cast<float>(std::rand() % static_cast<int>(backgroundBounds.width) + backgroundBounds.left);
             float yPos = backgroundBounds.top + 50;
             sf::Color color = (std::rand() % 2 == 0) ? sf::Color::Red : sf::Color(128, 0, 128);
@@ -89,7 +90,7 @@ int main() {
                 } else {
                     cocodriloLeft.decreaseScore();
                 }
-                bola.setPosition(sf::Vector2f(-100, -100)); // Mover la bola fuera de la pantalla
+                bola.setPosition(sf::Vector2f(-100, -10)); // Mover la bola fuera de la pantalla
             }
 
             if (cocodriloRight.getBounds().intersects(bola.getBounds())) {
@@ -102,9 +103,9 @@ int main() {
             }
         }
 
-        bolas.erase(std::remove_if(bolas.begin(), bolas.end(), [](const Bola& bola) {
-            return bola.getPosition().y < -100 || bola.getPosition().y > 700; // Límites arbitrarios para eliminar bolas fuera de la pantalla
-        }), bolas.end());
+bolas.erase(std::remove_if(bolas.begin(), bolas.end(), [&window](const Bola& bola) {
+    return bola.getPosition().y < -100 || bola.getPosition().y > window.getSize().y + 100; // Límites arbitrarios para eliminar bolas fuera de la pantalla
+}), bolas.end());
 
         if (!gameOver) {
             if (cocodriloLeft.getScore() >= 20) {

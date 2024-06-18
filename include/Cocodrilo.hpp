@@ -13,6 +13,7 @@ public:
     void increaseScore();
     void decreaseScore();
     int getScore() const;
+    void resetAnimation(); // Nuevo método para reiniciar la animación a la posición inicial
 
 private:
     sf::Sprite sprite;
@@ -23,6 +24,10 @@ private:
     float animationTime;
     int score;
     sf::Clock moveClock;
+    // Nuevos atributos para la animación
+    int frameIndex;
+    sf::IntRect textureRect;
+    sf::Texture texture; // Mantenemos la textura para controlar la animación
 };
 
 #endif // COCODRILO_HPP

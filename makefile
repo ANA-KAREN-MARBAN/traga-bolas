@@ -9,9 +9,15 @@ SFML_INCLUDE_PATH := /usr/local/include
 # Define CPPFLAGS here
 CPPFLAGS := -I$(INCLUDE_DIR) -I/opt/homebrew/include -std=c++11
 
+#INCLUDE := -I$(SRC_DIR) -I$(INCLUDE_DIR) -I/usr/local/include/SFML
+#INCLUDE := -I/usr/local/include -I/usr/local/include/SFML -I/usr/local/include/box2d
+#LIB := -L/usr/local/lib
+#SFML := -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio -lbox2d $(INCLUDE) $(LIB)
+#INCLUDE := -I/opt/homebrew/include
 LIB := -L/opt/homebrew/lib
 SFML := -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio -lbox2d $(INCLUDE) $(LIB)
 INCLUDE := -I$(SRC_DIR) -I$(INCLUDE_DIR) -I/opt/homebrew/include
+
 
 # Obtener todos los archivos .cpp en el directorio de origen
 CPP_FILES := $(wildcard $(SRC_DIR)/*.cpp)
@@ -28,7 +34,7 @@ $(BIN_DIR):
 
 # Regla para compilar cada archivo .cpp y generar el archivo .o correspondiente
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | $(OBJ_DIR)
-	g++ -c $< -o $@ $(INCLUDE) $(CPPFLAGS)
+	g++ -c $< -o $@ $(CPPFLAGS)
 
 # Regla para enlazar todos los archivos .o y generar el ejecutable
 $(BIN_DIR)/traga_bolas: $(OBJ_FILES) | $(BIN_DIR)
@@ -37,7 +43,7 @@ $(BIN_DIR)/traga_bolas: $(OBJ_FILES) | $(BIN_DIR)
 # Regla por defecto para compilar todos los archivos .cpp
 all: $(BIN_DIR)/traga_bolas
 
-# Regla para ejecutar el archivo .exe
+# Regla para ejecutar el archivo ejecutable
 run: $(BIN_DIR)/traga_bolas
 	./$<
 
