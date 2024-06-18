@@ -130,11 +130,11 @@ int main() {
 
         // Verificar condiciones de fin de juego
         if (!gameOver) {
-            if (cocodriloLeft.getScore() >= 7) {
+            if (cocodriloLeft.getScore() >= 10) {
                 gameOver = true;
                 winner = "Gana el jugador uno";
                 ganoSound.play(); // Reproducir sonido de victoria
-            } else if (cocodriloRight.getScore() >= 7) {
+            } else if (cocodriloRight.getScore() >= 10) {
                 gameOver = true;
                 winner = "Gana el jugador dos";
                 ganoSound.play(); // Reproducir sonido de victoria
