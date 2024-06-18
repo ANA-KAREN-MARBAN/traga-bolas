@@ -1,4 +1,5 @@
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include "Bola.hpp"
 #include "Cocodrilo.hpp"
 #include <vector>
@@ -40,7 +41,8 @@ int main() {
     if (!font.loadFromFile("assets/fonts/arial.ttf")) {
         return -1;
     }
-sf::Text scoreText;
+
+    sf::Text scoreText;
     scoreText.setFont(font);
     scoreText.setCharacterSize(24);
     scoreText.setFillColor(sf::Color::White);
@@ -51,6 +53,20 @@ sf::Text scoreText;
 
     sf::Clock clock;
     float spawnTimer = 0.0f;
+
+    // Cargar archivos de sonido
+    sf::SoundBuffer ganoBuffer, menosBuffer, masBuffer;
+    sf::Sound ganoSound, menosSound, masSound;
+
+    if (!ganoBuffer.loadFromFile("assets/music/gano.mp3") ||
+        !menosBuffer.loadFromFile("assets/music/menos.mp3") ||
+        !masBuffer.loadFromFile("assets/music/mas.mp3")) {
+        return -1; // Manejar error si no se pueden cargar los archivos de sonido
+    }
+
+    ganoSound.setBuffer(ganoBuffer);
+    menosSound.setBuffer(menosBuffer);
+    masSound.setBuffer(masBuffer);
 
     while (window.isOpen()) {
         sf::Event event;
@@ -71,7 +87,7 @@ sf::Text scoreText;
         spawnTimer += deltaTime;
 
         if (spawnTimer >= 0.09f) { // Aumentar el tiempo de spawn para ralentizar la generación de bolas
-            float xPos = static_cast<float>(std::rand() % static_cast<int>(backgroundBounds.width) + backgroundBounds.left);
+            float xPos = static_cast<float>(std::rand() % static_cast<int>(backgroundBounds.width / 2) + backgroundBounds.left + backgroundBounds.width / 4);
             float yPos = backgroundBounds.top + 50;
             sf::Color color = (std::rand() % 2 == 0) ? sf::Color::Red : sf::Color(128, 0, 128);
             bolas.emplace_back(15.0f, sf::Vector2f(xPos, yPos), color, bolaVelocity);
@@ -87,8 +103,10 @@ sf::Text scoreText;
             if (cocodriloLeft.getBounds().intersects(bola.getBounds())) {
                 if (bola.getColor() == sf::Color(128, 0, 128)) {
                     cocodriloLeft.increaseScore();
+                    masSound.play(); // Reproducir sonido de ganancia de puntos
                 } else {
                     cocodriloLeft.decreaseScore();
+                    menosSound.play(); // Reproducir sonido de pérdida de puntos
                 }
                 bola.setPosition(sf::Vector2f(-100, -10)); // Mover la bola fuera de la pantalla
             }
@@ -96,27 +114,34 @@ sf::Text scoreText;
             if (cocodriloRight.getBounds().intersects(bola.getBounds())) {
                 if (bola.getColor() == sf::Color::Red) {
                     cocodriloRight.increaseScore();
+                    masSound.play(); // Reproducir sonido de ganancia de puntos
                 } else {
                     cocodriloRight.decreaseScore();
+                    menosSound.play(); // Reproducir sonido de pérdida de puntos
                 }
                 bola.setPosition(sf::Vector2f(-100, -100)); // Mover la bola fuera de la pantalla
             }
         }
 
-bolas.erase(std::remove_if(bolas.begin(), bolas.end(), [&window](const Bola& bola) {
-    return bola.getPosition().y < -100 || bola.getPosition().y > window.getSize().y + 100; // Límites arbitrarios para eliminar bolas fuera de la pantalla
-}), bolas.end());
+        // Eliminar bolas fuera de la pantalla
+        bolas.erase(std::remove_if(bolas.begin(), bolas.end(), [&window](const Bola& bola) {
+            return bola.getPosition().y < -100 || bola.getPosition().y > window.getSize().y + 100; // Límites arbitrarios para eliminar bolas fuera de la pantalla
+        }), bolas.end());
 
+        // Verificar condiciones de fin de juego
         if (!gameOver) {
-            if (cocodriloLeft.getScore() >= 20) {
+            if (cocodriloLeft.getScore() >= 7) {
                 gameOver = true;
-                winner = "Ganó el jugador uno";
-            } else if (cocodriloRight.getScore() >= 20) {
+                winner = "Gana el jugador uno";
+                ganoSound.play(); // Reproducir sonido de victoria
+            } else if (cocodriloRight.getScore() >= 7) {
                 gameOver = true;
-                winner = "Ganó el jugador dos";
+                winner = "Gana el jugador dos";
+                ganoSound.play(); // Reproducir sonido de victoria
             }
         }
 
+        // Dibujar en pantalla
         window.clear();
         window.draw(background);
 

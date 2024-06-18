@@ -11,7 +11,7 @@ void Bola::update(const sf::FloatRect& bounds) {
     shape.move(velocity);
 
     if (!hasBounced) {
-        if (shape.getPosition().y + shape.getRadius() * 2 >= bounds.top + bounds.height) {
+        if (shape.getPosition().y + shape.getRadius() * 2 >= bounds.top + bounds.height * 0.8f) {
             velocity.y = -velocity.y;
             hasBounced = true;
         }
