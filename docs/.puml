@@ -1,57 +1,65 @@
 @startuml
-!define RECTANGLE
 
 class Bola {
-  - sf::CircleShape shape
-  - sf::Vector2f velocity
-  - bool hasBounced
-  + Bola(float radius, const sf::Vector2f& position, const sf::Color& color, const sf::Vector2f& velocity)
-  + void update(const sf::FloatRect& bounds)
-  + void draw(sf::RenderWindow& window) const
-  + sf::FloatRect getBounds() const
-  + sf::Color getColor() const
-  + void setPosition(const sf::Vector2f& position)
-  + sf::Vector2f getPosition() const
+    - shape: CircleShape
+    - velocity: Vector2f
+    - hasBounced: bool
+    + Bola(radius: float, position: Vector2f, color: Color, velocity: Vector2f)
+    + update(bounds: FloatRect): void
+    + draw(window: RenderWindow): void
+    + getBounds(): FloatRect
+    + getColor(): Color
+    + setPosition(position: Vector2f): void
+    + getPosition(): Vector2f
 }
 
 class Cocodrilo {
-  - sf::Sprite sprite
-  - sf::Vector2f initialPosition
-  - float moveDistance
-  - float moveDirection
-  - bool moving
-  - float animationTime
-  - int score
-  - sf::Clock moveClock
-  - int frameIndex
-  - sf::IntRect textureRect
-  - sf::Texture texture
-  + Cocodrilo(const sf::Texture& texture, const sf::Vector2f& position, float moveDirection)
-  + void moveForward()
-  + void update(float deltaTime)
-  + void draw(sf::RenderWindow& window) const
-  + sf::FloatRect getBounds() const
-  + void increaseScore()
-  + void decreaseScore()
-  + int getScore() const
-  + void resetAnimation()
+    - sprite: Sprite
+    - initialPosition: Vector2f
+    - moveDistance: float
+    - moveDirection: float
+    - moving: bool
+    - animationTime: float
+    - score: int
+    - moveClock: Clock
+    - frameIndex: int
+    - textureRect: IntRect
+    - texture: Texture
+    + Cocodrilo(texture: Texture, position: Vector2f, moveDirection: float)
+    + moveForward(): void
+    + update(deltaTime: float): void
+    + draw(window: RenderWindow): void
+    + getBounds(): FloatRect
+    + increaseScore(): void
+    + decreaseScore(): void
+    + getScore(): int
+    + resetAnimation(): void
 }
 
 class main {
-  + int main()
+    - window: RenderWindow
+    - background: Sprite
+    - backgroundBounds: FloatRect
+    - cocodriloLeft: Cocodrilo
+    - cocodriloRight: Cocodrilo
+    - bolas: vector<Bola>
+    - bolaVelocity: Vector2f
+    - font: Font
+    - scoreText: Text
+    - gameOver: bool
+    - winner: string
+    - clock: Clock
+    - spawnTimer: float
+    - ganoBuffer: SoundBuffer
+    - menosBuffer: SoundBuffer
+    - masBuffer: SoundBuffer
+    - ganoSound: Sound
+    - menosSound: Sound
+    - masSound: Sound
+    + main()
 }
 
-Bola --> sf::CircleShape
-Bola --> sf::Vector2f
-Bola --> sf::Color
-
-Cocodrilo --> sf::Sprite
-Cocodrilo --> sf::Vector2f
-Cocodrilo --> sf::Clock
-Cocodrilo --> sf::IntRect
-Cocodrilo --> sf::Texture
-
-main --> Bola
-main --> Cocodrilo
+Bola "1" --> "*" main
+Cocodrilo "1..2" --> "*" main
 
 @enduml
