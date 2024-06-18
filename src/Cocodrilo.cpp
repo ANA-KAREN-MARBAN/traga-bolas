@@ -1,44 +1,46 @@
 #include "Cocodrilo.hpp"
 
-Cocodrilo::Cocodrilo(const sf::Texture& texture, const sf::Vector2f& position, float stepSize) 
-    : initialPosition(position), stepSize(stepSize), frame(0), score(0) {
+Cocodrilo::Cocodrilo(const sf::Texture& texture, const sf::Vector2f& position, float moveDirection)
+    : initialPosition(position), moveDistance(30.0f), moveDirection(moveDirection), moving(false), animationTime(0.5f), score(0) {
     sprite.setTexture(texture);
     sprite.setPosition(position);
-    sprite.setTextureRect(sf::IntRect(0, 0, 50, 50));
-}
-
-void Cocodrilo::update() {
-    if (animationClock.getElapsedTime().asSeconds() > 0.1f) {
-        animate();
-        animationClock.restart();
-    }
-}
-
-void Cocodrilo::draw(sf::RenderWindow& window) {
-    window.draw(sprite);
-}
-
-void Cocodrilo::animate() {
-    frame = (frame + 1) % 6;
-    sprite.setTextureRect(sf::IntRect(frame * 50, 0, 50, 50));
 }
 
 void Cocodrilo::moveForward() {
-    sprite.move(stepSize, 0);
+    if (!moving) {
+        moving = true;
+        moveClock.restart();
+    }
 }
 
-void Cocodrilo::moveBackward() {
-    sprite.move(-stepSize, 0);
+void Cocodrilo::update(float deltaTime) {
+    if (moving) {
+        float elapsed = moveClock.getElapsedTime().asSeconds();
+        if (elapsed < animationTime) {
+            sprite.move(moveDirection * moveDistance * (elapsed / animationTime), 0);
+        } else {
+            sprite.setPosition(initialPosition);
+            moving = false;
+        }
+    }
 }
 
-void Cocodrilo::increaseScore() {
-    ++score;
-}
-
-int Cocodrilo::getScore() const {
-    return score;
+void Cocodrilo::draw(sf::RenderWindow& window) const {
+    window.draw(sprite);
 }
 
 sf::FloatRect Cocodrilo::getBounds() const {
     return sprite.getGlobalBounds();
+}
+
+void Cocodrilo::increaseScore() {
+    score++;
+}
+
+void Cocodrilo::decreaseScore() {
+    score--;
+}
+
+int Cocodrilo::getScore() const {
+    return score;
 }

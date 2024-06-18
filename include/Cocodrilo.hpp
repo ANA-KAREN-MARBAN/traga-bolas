@@ -5,23 +5,24 @@
 
 class Cocodrilo {
 public:
-    Cocodrilo(const sf::Texture& texture, const sf::Vector2f& position, float stepSize);
-    void update();
-    void draw(sf::RenderWindow& window);
-    void animate();
+    Cocodrilo(const sf::Texture& texture, const sf::Vector2f& position, float moveDirection);
     void moveForward();
-    void moveBackward();
-    void increaseScore();
-    int getScore() const;
+    void update(float deltaTime);
+    void draw(sf::RenderWindow& window) const;
     sf::FloatRect getBounds() const;
+    void increaseScore();
+    void decreaseScore();
+    int getScore() const;
 
 private:
     sf::Sprite sprite;
     sf::Vector2f initialPosition;
-    float stepSize;
+    float moveDistance;
+    float moveDirection;
+    bool moving;
+    float animationTime;
     int score;
-    int frame;
-    sf::Clock animationClock;
+    sf::Clock moveClock;
 };
 
 #endif // COCODRILO_HPP

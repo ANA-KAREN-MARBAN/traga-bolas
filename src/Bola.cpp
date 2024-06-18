@@ -1,27 +1,23 @@
 #include "Bola.hpp"
 
-Bola::Bola(float radius, const sf::Vector2f& position, const sf::Color& color, const sf::Vector2f& velocity) 
-    : velocity(velocity) {
+Bola::Bola(float radius, const sf::Vector2f& position, const sf::Color& color, const sf::Vector2f& velocity)
+    : velocity(velocity), hasBounced(false) {
     shape.setRadius(radius);
-    shape.setPosition(position);
     shape.setFillColor(color);
-    shape.setOrigin(radius, radius);
+    shape.setPosition(position);
 }
 
 void Bola::update(const sf::FloatRect& bounds) {
-    sf::Vector2f position = shape.getPosition();
-    position += velocity * 0.016f;
+    shape.move(velocity);
 
-    if (position.x - shape.getRadius() < bounds.left || 
-        position.x + shape.getRadius() > bounds.left + bounds.width) {
-        velocity.x = -velocity.x;
+    if (!hasBounced) {
+        if (shape.getPosition().y + shape.getRadius() * 2 >= bounds.top + bounds.height) {
+            velocity.y = -velocity.y;
+            hasBounced = true;
+        }
+    } else if (!bounds.intersects(shape.getGlobalBounds())) {
+        shape.setPosition(-100, -100); // Mover la bola fuera de la pantalla
     }
-    if (position.y - shape.getRadius() < bounds.top || 
-        position.y + shape.getRadius() > bounds.top + bounds.height) {
-        velocity.y = -velocity.y;
-    }
-
-    shape.setPosition(position);
 }
 
 void Bola::draw(sf::RenderWindow& window) const {
@@ -30,4 +26,16 @@ void Bola::draw(sf::RenderWindow& window) const {
 
 sf::FloatRect Bola::getBounds() const {
     return shape.getGlobalBounds();
+}
+
+sf::Color Bola::getColor() const {
+    return shape.getFillColor();
+}
+
+void Bola::setPosition(const sf::Vector2f& position) {
+    shape.setPosition(position);
+}
+
+sf::Vector2f Bola::getPosition() const {
+    return shape.getPosition();
 }

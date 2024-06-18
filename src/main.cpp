@@ -2,33 +2,54 @@
 #include "Bola.hpp"
 #include "Cocodrilo.hpp"
 #include <vector>
+#include <ctime>
+#include <cstdlib>
+#include <algorithm>
 
 int main() {
     sf::RenderWindow window(sf::VideoMode(800, 600), "Traga Bolas");
     sf::Texture backgroundTexture;
-    backgroundTexture.loadFromFile("assets/images/background.png");
+    if (!backgroundTexture.loadFromFile("assets/images/background.png")) {
+        return -1;
+    }
 
     sf::Sprite background(backgroundTexture);
     sf::FloatRect backgroundBounds = background.getGlobalBounds();
     background.setOrigin(backgroundBounds.width / 2, backgroundBounds.height / 2);
     background.setPosition(window.getSize().x / 2, window.getSize().y / 2);
 
+    // Cargar las texturas de los cocodrilos
     sf::Texture cocodriloTexture1, cocodriloTexture2;
-    cocodriloTexture1.loadFromFile("assets/images/cocodrilo1.png");
-    cocodriloTexture2.loadFromFile("assets/images/cocodrilo2.png");
+    if (!cocodriloTexture1.loadFromFile("assets/images/cocodrilo1.png") ||
+        !cocodriloTexture2.loadFromFile("assets/images/cocodrilo2.png")) {
+        return -1;
+    }
 
-    sf::Vector2f leftPosition(backgroundBounds.left + 50, backgroundBounds.top + backgroundBounds.height / 2);
-    sf::Vector2f rightPosition(backgroundBounds.left + backgroundBounds.width - 50, backgroundBounds.top + backgroundBounds.height / 2);
-    sf::Vector2f bolaPosition1(backgroundBounds.left + 100, backgroundBounds.top + 100);
-    sf::Vector2f bolaPosition2(backgroundBounds.left + backgroundBounds.width - 100, backgroundBounds.top + 100);
+    sf::Vector2f leftPosition(backgroundBounds.left + 20, window.getSize().y / 2);
+    sf::Vector2f rightPosition(backgroundBounds.left + backgroundBounds.width - 20, window.getSize().y / 2);
 
-    Cocodrilo cocodriloLeft(cocodriloTexture1, leftPosition, 2.0f);
-    Cocodrilo cocodriloRight(cocodriloTexture2, rightPosition, 2.0f);
+    Cocodrilo cocodriloLeft(cocodriloTexture1, leftPosition, 1.0f); // Avanza a la derecha
+    Cocodrilo cocodriloRight(cocodriloTexture2, rightPosition, -1.0f); // Avanza a la izquierda
 
-    Bola bola1(15.0f, bolaPosition1, sf::Color::Red, sf::Vector2f(50.0f, 50.0f));
-    Bola bola2(15.0f, bolaPosition2, sf::Color(128, 0, 128), sf::Vector2f(40.0f, 40.0f));
+    std::vector<Bola> bolas;
+    const sf::Vector2f bolaVelocity(0.0f, 0.5f); // Velocidad más lenta de las bolas
 
-    std::vector<Bola> bolas = { bola1, bola2 };
+    sf::Font font;
+    if (!font.loadFromFile("assets/fonts/arial.ttf")) {
+        return -1;
+    }
+
+    sf::Text scoreText;
+    scoreText.setFont(font);
+    scoreText.setCharacterSize(24);
+    scoreText.setFillColor(sf::Color::White);
+    scoreText.setPosition(window.getSize().x / 2 - 50, 10);
+
+    bool gameOver = false;
+    std::string winner;
+
+    sf::Clock clock;
+    float spawnTimer = 0.0f;
 
     while (window.isOpen()) {
         sf::Event event;
@@ -45,28 +66,77 @@ int main() {
             }
         }
 
-        cocodriloLeft.update();
-        cocodriloRight.update();
+        float deltaTime = clock.restart().asSeconds();
+        spawnTimer += deltaTime;
+
+        if (spawnTimer >= 0.2f) {
+            float xPos = static_cast<float>(std::rand() % static_cast<int>(backgroundBounds.width) + backgroundBounds.left);
+            float yPos = backgroundBounds.top + 50;
+            sf::Color color = (std::rand() % 2 == 0) ? sf::Color::Red : sf::Color(128, 0, 128);
+            bolas.emplace_back(15.0f, sf::Vector2f(xPos, yPos), color, bolaVelocity);
+            spawnTimer = 0.0f;
+        }
+
+        cocodriloLeft.update(deltaTime);
+        cocodriloRight.update(deltaTime);
 
         for (auto& bola : bolas) {
             bola.update(background.getGlobalBounds());
 
             if (cocodriloLeft.getBounds().intersects(bola.getBounds())) {
-                cocodriloLeft.increaseScore();
+                if (bola.getColor() == sf::Color(128, 0, 128)) {
+                    cocodriloLeft.increaseScore();
+                } else {
+                    cocodriloLeft.decreaseScore();
+                }
+                bola.setPosition(sf::Vector2f(-100, -100)); // Mover la bola fuera de la pantalla
             }
 
             if (cocodriloRight.getBounds().intersects(bola.getBounds())) {
-                cocodriloRight.increaseScore();
+                if (bola.getColor() == sf::Color::Red) {
+                    cocodriloRight.increaseScore();
+                } else {
+                    cocodriloRight.decreaseScore();
+                }
+                bola.setPosition(sf::Vector2f(-100, -100)); // Mover la bola fuera de la pantalla
+            }
+        }
+
+        bolas.erase(std::remove_if(bolas.begin(), bolas.end(), [](const Bola& bola) {
+            return bola.getPosition().y < -100 || bola.getPosition().y > 700; // Límites arbitrarios para eliminar bolas fuera de la pantalla
+        }), bolas.end());
+
+        if (!gameOver) {
+            if (cocodriloLeft.getScore() >= 20) {
+                gameOver = true;
+                winner = "Ganó el jugador uno";
+            } else if (cocodriloRight.getScore() >= 20) {
+                gameOver = true;
+                winner = "Ganó el jugador dos";
             }
         }
 
         window.clear();
         window.draw(background);
+
+        for (auto& bola : bolas) {
+            bola.draw(window);
+        }
+
         cocodriloLeft.draw(window);
         cocodriloRight.draw(window);
 
-        for (const auto& bola : bolas) {
-            bola.draw(window);
+        if (!gameOver) {
+            scoreText.setString("Jugador 1: " + std::to_string(cocodriloLeft.getScore()) + " Jugador 2: " + std::to_string(cocodriloRight.getScore()));
+            window.draw(scoreText);
+        } else {
+            sf::Text gameOverText;
+            gameOverText.setFont(font);
+            gameOverText.setCharacterSize(48);
+            gameOverText.setFillColor(sf::Color::White);
+            gameOverText.setString(winner);
+            gameOverText.setPosition(window.getSize().x / 2 - gameOverText.getGlobalBounds().width / 2, window.getSize().y / 2);
+            window.draw(gameOverText);
         }
 
         window.display();

@@ -9,10 +9,14 @@ public:
     void update(const sf::FloatRect& bounds);
     void draw(sf::RenderWindow& window) const;
     sf::FloatRect getBounds() const;
+    sf::Color getColor() const;
+    void setPosition(const sf::Vector2f& position);
+    sf::Vector2f getPosition() const;
 
 private:
     sf::CircleShape shape;
     sf::Vector2f velocity;
+    bool hasBounced;
 };
 
 #endif // BOLA_HPP
