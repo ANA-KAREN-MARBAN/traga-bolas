@@ -36,30 +36,45 @@ class Cocodrilo {
     + resetAnimation(): void
 }
 
-class main {
-    - window: RenderWindow
-    - background: Sprite
-    - backgroundBounds: FloatRect
-    - cocodriloLeft: Cocodrilo
-    - cocodriloRight: Cocodrilo
-    - bolas: vector<Bola>
-    - bolaVelocity: Vector2f
-    - font: Font
-    - scoreText: Text
-    - gameOver: bool
-    - winner: string
-    - clock: Clock
-    - spawnTimer: float
+class SoundManager {
     - ganoBuffer: SoundBuffer
     - menosBuffer: SoundBuffer
     - masBuffer: SoundBuffer
     - ganoSound: Sound
     - menosSound: Sound
     - masSound: Sound
-    + main()
+    + SoundManager()
+    + loadSounds(): void
+    + playGanoSound(): void
+    + playMenosSound(): void
+    + playMasSound(): void
 }
 
-Bola "1" --> "*" main
-Cocodrilo "1..2" --> "*" main
+class Drawer {
+    - window: RenderWindow
+    + Drawer(window: RenderWindow)
+    + drawBackground(background: Sprite): void
+    + drawBolas(bolas: vector<Bola>): void
+    + drawCocodrilos(cocodriloLeft: Cocodrilo, cocodriloRight: Cocodrilo): void
+    + drawScore(scoreText: Text): void
+    + drawGameOver(gameOverText: Text): void
+}
+
+class Timer {
+    - clock: Clock
+    + Timer()
+    + restart(): float
+    + getElapsedTime(): float
+}
+
+Bola -- Drawer : uses
+Cocodrilo o-- SoundManager : aggregation
+Bola *-- Timer : composition
+Cocodrilo *-- Timer : composition
+main --> Bola : creates
+main --> Cocodrilo : creates
+main --> SoundManager : creates
+main --> Drawer : creates
+main --> Timer : creates
 
 @enduml
