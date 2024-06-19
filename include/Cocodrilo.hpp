@@ -3,12 +3,13 @@
 
 #include <SFML/Graphics.hpp>
 
-class Cocodrilo {
+class Cocodrilo
+{
 public:
-    Cocodrilo(const sf::Texture& texture, const sf::Vector2f& position, float moveDirection);
+    Cocodrilo(const sf::Texture &texture, const sf::Vector2f &position, float moveDirection);
     void moveForward();
     void update(float deltaTime);
-    void draw(sf::RenderWindow& window) const;
+    void draw(sf::RenderWindow &window) const;
     sf::FloatRect getBounds() const;
     void increaseScore();
     void decreaseScore();
