@@ -1,4 +1,4 @@
-Juego Traga Bolas
+# Juego Traga Bolas
 
 Objetivo:
 El objetivo de este proyecto es desarrollar un juego de Traga Bolas utilizando la biblioteca SFML, donde dos cocodrilos compiten por comer la mayor cantidad de bolas de colores que caen aleatoriamente por la pantalla.
