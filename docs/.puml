@@ -67,14 +67,14 @@ class Timer {
     + getElapsedTime(): float
 }
 
-Bola --|> Drawer : uses
-Cocodrilo "2" o-- "1" SoundManager : aggregation
-Bola "*" *-- "1" Timer : composition
-Cocodrilo "2" *-- "1" Timer : composition
-Juego --|> Bola : creates
-Juego --|> Cocodrilo : creates
-Juego --|> SoundManager : creates
-Juego --|> Drawer : creates
-Juego --|> Timer : creates
+Bola --|> Drawer 
+Cocodrilo "2" o-- "1" SoundManager 
+Bola "*" *-- "1" Timer 
+Cocodrilo "2" *-- "1" Timer 
+Juego --|> Bola 
+Juego --|> Cocodrilo 
+Juego --|> SoundManager 
+Juego --|> Drawer 
+Juego --|> Timer 
 
 @enduml
